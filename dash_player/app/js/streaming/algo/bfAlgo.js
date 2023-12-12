@@ -2,18 +2,15 @@ MediaPlayer.dependencies.bfAlgo = function() {
     "use strict";
 
     var getBitrate = function(B_h, bfVar, bfLevel, sc, st) {
-        //$('#txt_log').append("SC: " + sc + "\n");
-        // Initialize constants and variables needed for algorithm
-        if(bfLevel <= 4.2){
-            //X[sc] = bfVar.X_0[1];
-            return 0;
 
+        if(bfLevel <= 1.2){
+            return 0;
         }
         
         var self = this,
             sumFetched = 0,
-            delta = 0.000001,
-            maxShift=2,
+            delta = 0.000001, 
+            maxShift = 2,
             s = bfVar.s,
             L = bfVar.L,
             C = bfVar.C,
@@ -22,18 +19,15 @@ MediaPlayer.dependencies.bfAlgo = function() {
             bfLayerQuality = [1400, 2400, 4000, 8000, 12000],
             d = bfVar.d,
             deadline = bfVar.deadline,
-            X = [], //X_0, //bfVar.X,
-            x = [], //bfVar.x,
-            ft = bfVar.ft,
+            X = [], 
+            x = [], 
+            ft = bfVar.ft, 
             I0 = bfVar.I0,
-            bwLen = C + 500;
+            bwLen = C + 500; 
 
-
-            
         for (var i = 1; i <= C; i++) {
             X[i] = bfVar.X_0[i];
         }
-
         for (var i = 1; i <= C; i++) {
             for (var j = 1; j <= C + 60; j++) {
                 x[i, j] = 0;
@@ -41,76 +35,32 @@ MediaPlayer.dependencies.bfAlgo = function() {
         }
 
         if(B_h < 100){
-            B_h=100;
+            B_h = 100;
+        }
+        var tempValue = Math.ceil((Bm - bfLevel) / L);
+        var tempValue2 = Math.floor(bfLevel / L);
+        var ec = Math.min(sc + W, C); 
+        deadline[sc] = st + tempValue2;
+        for (var i = sc + 1; i <= C; i++){
+            deadline[i] = deadline[i-1] + L;
+            d[i] = d[sc];
+        }
 
+        var totBw = B_h / 2;
+        for (var i = st + 1; i <= deadline[sc]; i++) {
+            totBw += B_h;
         }
-        //$('#txt_log').append(bfLevel + "\n");
-        //$('#txt_log').append(B_h + "\n");
-        var tempValue=Math.ceil((Bm-bfLevel)/L);
-        var tempValue2=Math.floor(bfLevel/L);
-        //if(W > tempValue){
-            //W=tempValue;
-        //}
-        var ec = Math.min(sc + W, C);
-        deadline[sc]=st+tempValue2;
-        for (var i=sc+1; i <= C; i++){
-            deadline[i]=deadline[i-1]+L;
-            d[i]=d[sc];
-        }
-        var totBw=B_h / 2;
-        
-        for (var i = st+1; i <= deadline[sc]; i++) {
-            totBw = totBw+B_h;
-            //alert(B_h);
-            //alert(B[i]);
-        }
-        
-        //$('#txt_log').append("hi from AnisbfLevel" + "\n");
-       
+
         if(totBw < bfLayerQuality[0]){
-            //for (var k = sc; k < C; k++) {
-                    //d[k] = d[k] + maxShift;
-                    //deadline[k] = deadline[k] + maxShift;
-
-                //}
-               // $('#txt_log').append("inside low bandwidth\n");
             return 1;
-        }
-
-        else if (sc > ec) {
-            //X[sc] = bfVar.X_4[1];
-            //$('#txt_log').append("inside return 4: ");
+        } else if (sc > ec) {
             return 4;
-            //return bfVar.X[sc];
-            //else if{
-
-           // }
         } else {
-
-            
-            //$('#txt_log').append("before base forward\n");
-
-            //BaseforwardAlgo(B_h, X, ec, d, deadline, Bm, bfLevel, sc, st, C, bwLen, x, ft);
-
-            //$('#txt_log').append("after base forward\n");
-            
-            //bf.d = r[0];
-            //deadline = r[1];
-            //x = r[2];
-
-            //[d, deadline, x(sc:ec,st:et)]=noSkip_forwardAlgo(B, X_0, ec, d, deadline, buf,bf,sc,st,C, videoLen);
             var et = deadline[ec];
 
-            //alert(et);
-
-            //for (i = sc; i <= C; i++) {
-                //d[i] = d[ec];
-                //deadline[i] = (i - 1) * L + s + d[ec];
-            //}
             for (var i = 1; i <= C; i++) {
                 X[i] = bfVar.X_0[i];
             }
-
 
             for (var i = 1; i <= C; i++) {
                 for (var j = 1; j <= C + 60; j++) {
@@ -122,52 +72,9 @@ MediaPlayer.dependencies.bfAlgo = function() {
                 ft[i] = st;
             }
 
-            //[d, deadline]=noSkip_backAlgo(B, X_0, x, ec, d, deadline, buf, bf, ft,sc,st,C);
-            //BaseBackAlgo(B_h, X, x, ec, d, deadline, Bm, bfLevel, ft, sc, st, C);
-            //$('#txt_log').append("after base backward\n");
-            //return 0;
-
-            //et = deadline[ec];
-
-            //bfVar.X[sc] = bfVar.X_0[sc];
-
-            //for (var i = 1; i <= bfVar.C; i++) {
-                //X[i] = bfVar.X_0[i];
-            //}
-
-            //for (var i = 1; i <= C; i++) {
-                //for (var j = 1; j <= C + 60; j++) {
-                    //x[i, j] = 0;
-                //}
-            //}
-
-
             forwardAlgo(B_h, sc, ec, X, deadline, Bm, I0, bfLevel, st, et, C, ft, x);
-            //$('#txt_log').append("after forward\n");
-
-
-            //$('#txt_log').append("ft: \t");
-            //for (i = sc; i <= ec; i++) {
-               // $('#txt_log').append(ft[i] + ", ");
-            //}
-           // $('#txt_log').append("\n");
-
-
-            //return 4;
-
-
-            //alert(bfVar.X_1[1]);
-            //alert("anis");
-            //for(i=1; i <= C; i++){
-            //alert("fetched at " + ft[i]);
-            //alert("quality is " + X[i]);
-            //}
-            
-
             backwardAlgo(B_h, sc, ec, X, bfVar.X_1, deadline, Bm, bfLevel, ft, x, st, C);
-            //$('#txt_log').append("after backward\n");
-            //return 0;
-            
+
             for (var i = 1; i <= C; i++) {
                 for (var j = 1; j <= 1000; j++) {
                     x[i, j] = 0;
@@ -205,18 +112,9 @@ MediaPlayer.dependencies.bfAlgo = function() {
                 }
             }
 
-            //[ft, x(sc: ec, st: et), bff] = forwardAlgoV4(B, sc, ec, X, deadline, buf, I0, bf, st, et, C);
-            // [X, I3(sc: ec), bft, bfr] = backwardAlgoV4(B, sc, ec, X, X_3, deadline, buf, bf, ft, x, st, C);
-            // [ft, x(sc: ec, st: et), bff] = forwardAlgoV4(B, sc, ec, X, deadline, buf, I0, bf, st, et, C);
-            // [X, I4(sc: ec), bft, bfr] = backwardAlgoV4(B, sc, ec, X, X_4, deadline, buf, bf, ft, x, st, C);
-            //  [ft, x(sc: ec, st: et), bff] = forwardAlgoV4(B, sc, ec, X, deadline, buf, I0, bf, st, et, C);
 
         }
 
-        //alert("after");
-        //alert(X[sc]);
-        //alert();
-        //$('#txt_log').append(bfLevel + " here down \n");
         if (Math.abs(X[sc] - bfLayerQuality[0]) < delta) {
             return 1;
         } else if (Math.abs(X[sc] - bfLayerQuality[1]) < delta) {
@@ -262,15 +160,7 @@ MediaPlayer.dependencies.bfAlgo = function() {
             tmp,
             j = st,
             i = sc;
-        //alert(ft[st]);
-        //ft = [],
-        //x = [],
-        // row = [];
 
-        // while (cols--) row.push(0);
-        // while (rows--) x.push(row);
-
-        //
         for (i = sc; i <= ec; i++) {
             X[i] = Xt[i];
         }
@@ -282,12 +172,10 @@ MediaPlayer.dependencies.bfAlgo = function() {
 
         for (i = st; i <= deadline[ec] + 360; i++) {
             B[i] = B_h;
-            //alert(B_h);
-            //alert(B[i]);
+
         }
         B[st] = B[st] / 2; // - sumFetched;
-        //alert(st);
-        //alert(B[st]);
+
 
         bf[st] = Math.floor(bfLevel / 4);
         bf[st + 1] = Math.floor(bfLevel / 4);
@@ -328,10 +216,7 @@ MediaPlayer.dependencies.bfAlgo = function() {
                 i = i + 1;
             } else if (X[i] < delta && fetchFlag[i] == 0 && j > deadline[i]) {
                 tmp = j - deadline[i];
-                //  d[i: C] = d[i: C] + tmp;
-                // deadline[i: C] = deadline[i: C] + tmp;
 
-                //bf[ft[i]: deadline[i]] = bf[ft[i]: deadline[i]] + 1;
                 
                 for (var k = i; k <= C; k++) {
                     d[k] = d[k] + tmp;
@@ -361,9 +246,6 @@ MediaPlayer.dependencies.bfAlgo = function() {
 
 
 
-        //xx = x[sc: ec, st: videoLen];
-
-        //return [d, deadline, x]
     };
 
 
@@ -386,12 +268,10 @@ MediaPlayer.dependencies.bfAlgo = function() {
 
         for (i = st; i <= j + 60; i++) {
             B[i] = B_h;
-            //alert(B_h);
-            //alert(B[i]);
+
         }
         B[st] = B[st] / 2; // - sumFetched;
-        //alert(st);
-        //alert(B[st]);
+
         bf[st] = Math.floor(bfLevel / 4);
         bf[st + 1] = Math.floor(bfLevel / 4);
         for (var i = st + 2; i <= C + 100; i = i + 4) {
@@ -413,8 +293,7 @@ MediaPlayer.dependencies.bfAlgo = function() {
             if (j <= deadline[i]) {
 
                 if (bf[deadline[i]] >= Bm && fetchFlag[i] == 0) {
-                    //d(sc:i)=d(sc:i)-1;
-                    //deadline(sc:i)=deadline(sc:i)-1;
+
                     
                     for (var k = sc; k <= i; k++) {
                         d[k] = d[k] - 1;
@@ -479,103 +358,67 @@ MediaPlayer.dependencies.bfAlgo = function() {
         }
     };
 
-
-
-    var forwardAlgo = function(B_h, sc, ec, Xt, deadline, Bm, I, bfLevel, st, et, C, ft, x) {
-
-        //x=zeros(C,deadline(C));
-        var j = st,
-            delta = 0.000001,
-            i = sc, //%iidx;
-            fetched,
-            B = [],
-            bf = [],
-            X = [],
-            ffFlag = []; //zeros(1,C);
-        for (var k = sc; k <= C; k++) {
-            // fetchFlag[k] = 0;
-            ffFlag[k] = 0;
+    function forwardAlgo(B_h, sc, ec, Xt, deadline, Bm, I, bfLevel, st, et, C, ft, x) {
+        var delta = 0.000001,
+            
+        //predefined array sizes 
+            B = Array(deadline[ec] + 61).fill(B_h),
+            bf = Array(C + 101).fill(Math.floor(bfLevel / 4)),
+            X = Array(C + 1).fill(0),
+            ffFlag = Array(C + 1).fill(0);
+        //bandwith initialization
+        B[st] = B[st] / 2;
+        //initializing the bf array for buffer calculations
+        for (var h = st + 2; h <= C + 100; h += 4) {
+            bf.fill(Math.max(Math.floor(bfLevel / 4) - 1, 0), h, h + 4);
         }
-
-        for (i = sc; i <= ec; i++) {
+        
+        for (var i = sc; i <= ec; i++) {
             X[i] = Xt[i];
         }
-
-        for (var k = st; k <= deadline[ec] + 60; k++) {
-            B[k] = B_h;
-            //alert(B_h);
-            //alert(B[i]);
-        }
-        B[st] = B[st] / 2; // - sumFetched;
-        //alert(st);
-        //alert(B[st]);
-
-        bf[st] = Math.floor(bfLevel / 4);
-        bf[st + 1] = Math.floor(bfLevel / 4);
-        for (var h = st + 2; h <= C + 100; h = h + 4) {
-            for (var k = 0; k <= 3; k++) {
-                bf[h + k] = Math.max(Math.floor(bfLevel / 4) - 1, 0);
-            }
-
-        }
-
-        i = sc;
+    
+        var i = sc, j = st, fetched;
+        //main loop to process algo
         while (j <= deadline[ec]) {
-            //alert(j);
             if (i > ec) {
                 break;
             }
-
+    
             if (j <= deadline[i]) {
                 if (bf[j] >= Bm) {
-                    // alert("buffer is full");
-                    j = j + 1;
+                    j++;
                     continue;
                 }
-
+                //fetch minimum of bandwith
                 fetched = Math.min(B[j], X[i]);
-                //alert(i);
-
-                //alert("bandwidth: " + B[j]);
-                //alert("fetched: " + fetched);
-                if (ffFlag[i] == 0 && fetched > delta) {
+                if (ffFlag[i] === 0 && fetched > delta) {
                     ft[i] = j;
-
                     ffFlag[i] = 1;
-
                 }
-
-                x[i, j] = x[i, j] + fetched;
-                B[j] = B[j] - fetched;
-                X[i] = X[i] - fetched;
-                //%bf(j)=bf(j)+1;
-
-
+                
+                if (!x[i]) x[i] = [];
+                x[i][j] = (x[i][j] || 0) + fetched;
+                //update bandwith and bitrate
+                B[j] -= fetched;
+                X[i] -= fetched;
+                
+                //increment buffer
                 if (X[i] < delta) {
-                    // bf(ft(i):deadline(i))=bf(ft(i):deadline(i))+1;
                     for (var k = ft[i]; k <= deadline[i]; k++) {
-                        bf[k] = bf[k] + 1;
+                        bf[k]++;
                     }
-                    i = i + 1;
-                    //%continue;
+                    i++;
                 }
-
+                //move to next time slot if bandwith is depleted
                 if (B[j] < delta) {
-                    j = j + 1;
-                    //alert("increment " + j)
-                    //%continue;
+                    j++;
                 }
-
-
             } else {
-                i = i + 1;
+                i++;
             }
-
-
         }
-        //xx=x(sc:ec,st:et);
-    };
-
+    }
+    
 
 
 
